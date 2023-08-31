@@ -200,6 +200,7 @@ KJUR.asn1.tsp.TSTInfo = function(params) {
 	_Accuracy = _KJUR_asn1_tsp.Accuracy,
         _X500Name = _KJUR_asn1.x509.X500Name,
         _GeneralName = _KJUR_asn1.x509.GeneralName;
+        _Extensions = _KJUR_asn1.x509.Extensions;
 	
 
     _KJUR_asn1_tsp.TSTInfo.superclass.constructor.call(this);
@@ -213,6 +214,7 @@ KJUR.asn1.tsp.TSTInfo = function(params) {
     this.dOrdering = null;
     this.dNonce = null;
     this.dTsa = null;
+    this.dExtensions = null;
 
     this.tohex = function() {
         var a = [this.dVersion];
@@ -236,6 +238,7 @@ KJUR.asn1.tsp.TSTInfo = function(params) {
         if (this.dOrdering != null) a.push(this.dOrdering);
         if (this.dNonce != null) a.push(this.dNonce);
         if (this.dTsa != null) a.push(this.dTsa);
+        if (this.dExtensions != null) a.push(this.dExtensions);
 
         var seq = new _DERSequence({array: a});
         this.hTLV = seq.tohex();
@@ -274,6 +277,13 @@ KJUR.asn1.tsp.TSTInfo = function(params) {
 		explicit: true,
 		obj: new _GeneralName({dn: params.tsa})
 	    });
+        }
+        if (params.ext !== undefined) {
+            this.dExtensions = new _DERTaggedObject({
+                tag: 'a1',
+                explicit: false,
+                obj: new _Extensions(params.ext) 
+            });
         }
     }
 };
@@ -1603,6 +1613,12 @@ KJUR.asn1.tsp.TSPParser = function() {
 	if (idxList.length < 2)
             throw new Error("TimeStampReq must have at least 2 items");
 
+        const vtag = h.substr(idxList[0], 2);
+        if (vtag !== '02')
+           throw new Error('invalid TimestampRequest');
+        json.version = _getV(h, idxList[0]);
+        if (json.version !== '01')
+           throw Error('TimestampRequest version not supported');
 	var miHex = _getTLV(h, idxList[1]);
 	json.messageImprint = KJUR.asn1.tsp.TSPUtil.parseMessageImprint(miHex); 
 

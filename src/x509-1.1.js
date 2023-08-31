@@ -2652,6 +2652,9 @@ function X509(params) {
 	    } else if (item1.bmpstr != undefined) {
 		result.ds = "bmp";
 		result.value = item1.bmpstr.str;
+            } else if (item1.bitstr != undefined) {
+                result.ds = "bit";
+                result.value = item1.bitstr.hex;
 	    } else {
 		throw "error";
 	    }

@@ -3654,6 +3654,7 @@ KJUR.asn1.x509.AttributeTypeAndValue = function(params) {
 	_DERIA5String = _KJUR_asn1.DERIA5String,
 	_DERVisibleString = _KJUR_asn1.DERVisibleString,
 	_DERBMPString = _KJUR_asn1.DERBMPString,
+        _DERBitString = _KJUR_asn1.DERBitString,
 	_isMail = _KJUR.lang.String.isMail,
 	_isPrintable = _KJUR.lang.String.isPrintable;
 
@@ -3724,6 +3725,7 @@ KJUR.asn1.x509.AttributeTypeAndValue = function(params) {
         if (dsType == "ia5")  return new _DERIA5String({"str": valueStr});
         if (dsType == "vis")  return new _DERVisibleString({"str": valueStr});
         if (dsType == "bmp")  return new _DERBMPString({"str": valueStr});
+        if (dsType == "bit")  return new _DERBitString({"hex": valueStr});
         throw new Error("unsupported directory string type: type=" +
 			dsType + " value=" + valueStr);
     };
