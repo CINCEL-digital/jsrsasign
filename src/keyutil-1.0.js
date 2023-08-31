@@ -491,6 +491,11 @@ var KEYUTIL = function() {
                 throw new Error("malformed format pbkdf2Iter: " + iterNumHex);
             }
 
+            // 2.2.2.1.3 PBKDF2 prf AlgorithmIdentifier 
+            if (a0_0_1_0_1.length < 3)
+                info.prf = CryptoJS.algo.SHA1; 
+            else
+                throw new Error("pbkdf2Prf parm not implemented");
             return info;
         },
 
@@ -524,7 +529,7 @@ var KEYUTIL = function() {
             var pbkdf2Iter = info.pbkdf2Iter;
             var pbkdf2KeyWS = CryptoJS.PBKDF2(passcode, 
                                               pbkdf2SaltWS, 
-                                              { keySize: 192/32, iterations: pbkdf2Iter });
+                                              { keySize: 192/32, iterations: pbkdf2Iter, hasher: pbkdf2prf });
             var pbkdf2KeyHex = CryptoJS.enc.Hex.stringify(pbkdf2KeyWS);
             return pbkdf2KeyHex;
         },

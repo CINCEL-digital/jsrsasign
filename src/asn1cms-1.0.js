@@ -1181,8 +1181,17 @@ KJUR.asn1.cms.SignerInfo = function(params) {
 	var sigalg = params.sigalg;
 
 	var hData = (new _AttributeList(params.sattrs)).tohex();
-	var prvkey = _KEYUTIL.getKey(params.signkey);
-	var sig = new _KJUR_crypto.Signature({alg: sigalg});
+	var prvkey = null;
+	var sig;
+	if (params.provName === undefined || params.provName.substr(0, 6) !== 'pkcs11') {
+		prvkey = _KEYUTIL.getKey(params.signkey, params.signkeypass);
+		sig = new _KJUR_crypto.Signature({alg: sigalg});
+	 }
+	 else {
+	   prvkey = params.signkey;
+	   sig = new CINCEL.crypto.HSMSignature({alg: sigalg, prov: params.provName, provInfo: params.provInfo});
+	 }
+	   
 	sig.init(prvkey);
 	sig.updateHex(hData);
 	var hSig = sig.sign();
@@ -1522,7 +1531,8 @@ KJUR.asn1.cms.SignedData = function(params) {
 	    var sinfo = sinfos[i];
 	    var ctParam = this._getAttrParamByName(sinfo, "contentType");
 	    //console.log(ctParam.type + " > " + type);
-	    ctParam.type = type;
+            if (ctParam !== undefined) 
+	        ctParam.type = type;
 	}
     };
 
@@ -1549,11 +1559,12 @@ KJUR.asn1.cms.SignedData = function(params) {
 	    var sinfo = sinfos[i];
 	    var hashalg = sinfo.hashalg;
 	    var mdParam = this._getAttrParamByName(sinfo, "messageDigest");
+	    if (mdParam !== undefined && hContent !== undefined) {  
+	       var hNew = KJUR.crypto.Util.hashHex(hContent, hashalg);
 
-	    var hNew = KJUR.crypto.Util.hashHex(hContent, hashalg);
-
-	    //console.log(mdParam.hex + " > " + hNew);
-	    mdParam.hex = hNew;
+	       //console.log(mdParam.hex + " > " + hNew);
+	       mdParam.hex = hNew;
+	    }
 	}
     };
 
@@ -1566,6 +1577,8 @@ KJUR.asn1.cms.SignedData = function(params) {
      * by attribute name.
      */
     this._getAttrParamByName = function(siParam, attrName) {
+	if (siParam.sattrs === undefined)
+	    return;
 	var aSattrs = siParam.sattrs.array;
 	for (var i = 0; i < aSattrs.length; i++) {
 	    if (aSattrs[i].attr == attrName) return aSattrs[i];
@@ -1788,7 +1801,11 @@ KJUR.asn1.cms.CertificateSet = function(params) {
 
 	for (var i = 0; i < aParam.length; i++) {
 	    var pem = aParam[i];
-	    var hCert = pemtohex(pem);
+	    var hCert;
+	    if (pem.substring(0,2) === '30')
+		hCert = pem
+	    else 
+		hCert = pemtohex(pem);
 	    var dCert = new _ASN1Object();
 	    dCert.hTLV = hCert;
 	    a.push(dCert);
