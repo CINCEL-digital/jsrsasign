@@ -1,0 +1,128 @@
+.PHONY: all
+
+files = \
+	src/asn1-1.0.js \
+	src/asn1hex-1.1.js \
+	src/asn1x509-1.0.js \
+	src/asn1cms-1.0.js \
+	src/asn1tsp-1.0.js \
+	src/asn1cades-1.0.js \
+	src/asn1csr-1.0.js \
+	src/asn1ocsp-1.0.js \
+	src/base64x-1.1.js \
+	src/crypto-1.1.js \
+	src/ecdsa-modified-1.0.js \
+	src/ecparam-1.0.js \
+	src/dsa-2.0.js \
+	src/keyutil-1.0.js \
+	src/rsapem-1.1.js \
+	src/rsasign-1.2.js \
+	src/x509-1.1.js \
+	src/jws-3.3.js \
+	src/jwsjs-2.0.js \
+	src/x509crl.js
+
+files_add = \
+	src/adds/HSMSignature.js
+
+# src/nodeutil-1.0.js
+
+files_ext = \
+	ext/base64.js \
+	ext/jsbn.js \
+	ext/jsbn2.js \
+	ext/prng4.js \
+	ext/rng.js \
+	ext/rsa.js \
+	ext/rsa2.js \
+	ext/ec.js \
+	ext/ec-patch.js \
+	ext/json-sans-eval.js
+
+files_cj0 = \
+	ext/cj/cryptojs-312-core-fix.js \
+
+files_cj = \
+	ext/cj/x64-core.js \
+	ext/cj/cipher-core.js \
+	ext/cj/aes.js \
+	ext/cj/tripledes.js \
+	ext/cj/enc-base64.js \
+	ext/cj/md5.js \
+	ext/cj/sha1.js \
+	ext/cj/sha256.js \
+	ext/cj/sha224.js \
+	ext/cj/sha512.js \
+	ext/cj/sha384.js \
+	ext/cj/ripemd160.js \
+	ext/cj/hmac.js \
+	ext/cj/pbkdf2.js
+
+tmp1 = $(subst .js,.min.js,$(files))
+files_min = $(subst src/,min/,$(tmp1))
+
+tmp2 = $(subst .js,.min.js,$(files_add))
+files_add_min = $(subst src/adds/,min/adds/,$(tmp2))
+
+files_ext_min = $(subst .js,-min.js,$(files_ext))
+files_cj0_min  = $(subst .js,-min.js,$(files_cj0))
+files_cj_min  = $(subst .js,_min.js,$(files_cj))
+
+#cadenas:
+#	@echo $(files_cj_min) $(files_ext_min) $(files_min) $(files_add_min)
+
+minify: jsrsasign-all-min.js
+	@echo "jsrsasign-all-min.js builded"
+
+jsrsasign-all-min.js: all-cj0-min all-cj-min all-ext-min all-min
+	cat src/version.js > $@ 
+	for i in $(files_cj0_min) $(files_cj_min) $(files_ext_min) $(files_min) $(files_adds_min); \
+		do \
+			echo >> $@ ;\
+			cat $$i >> $@ ;\
+	done
+	
+all-min: $(files_min) $(files_adds_min)
+	@echo "all min converted."
+	@echo "----> $(files_min)"
+
+all-ext-min: $(files_ext_min)
+	@echo "all ext min converted."
+
+all-cj0-min:  $(files_cj0_min)
+	@echo "all ext min converted."
+
+all-cj-min: $(files_cj_min)
+	@echo "all ext min converted."
+
+min/%.min.js: src/%.js
+	uglifyjs $^ -o $@
+	echo >> $@
+
+ext/%-min.js: ext/%.js
+	uglifyjs $^ -o $@
+	echo >> $@
+
+ext/cj/%-min.js: ext/cj/%.js
+	uglifyjs $^ -o $@
+	echo >> $@
+
+ext/cj/%_min.js: ext/cj/%.js
+	uglifyjs $^ -o $@
+	echo >> $@
+
+# ----------------------
+
+dev: jsrsasign-all.js
+	@echo "jsrsasign-all.js builded"	
+
+jsrsasign-all.js: $(files-cj0) $(files-cj) $(files-ext) $(files) $(files_add)
+	cat src/version.js > $@ 
+	for i in $(files_cj0) $(files_cj) $(files_ext) $(files) $(files_add); \
+		do \
+			echo >> $@ ;\
+			cat $$i >> $@ ;\
+	done
+	
+#all-files: files-cj0 files-cj files-ext files files_add
+#	@echo "original scrs"

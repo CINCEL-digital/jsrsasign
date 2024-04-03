@@ -2660,7 +2660,7 @@ function X509(params) {
 	    }
 	    return result;
 	} catch(ex) {
-	    throw new Erorr("improper ASN.1 parsed AttrTypeAndValue");
+	    throw new Error("improper ASN.1 parsed AttrTypeAndValue");
 	}
     };
 

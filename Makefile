@@ -47,15 +47,52 @@ JSDOC_SRC = \
 	nodeutil-1.0.js
 
 FILES_EXT_MIN = \
+	ext/base64-min.js \
 	ext/ec-min.js \
+	ext/ec-patch-min.js \
+	ext/jsbn-min.js \
+	ext/jsbn2-min.js \
+	ext/json-sans-eval-min.js \
+	ext/prng4-min.js \
+	ext/rng-min.js \
 	ext/rsa-min.js \
 	ext/rsa2-min.js
+
+FILES_CRYPTOJS_MIN = \
+	ext/cj/cryptojs-312-core-fix-min.js \
+	ext/cj/cipher-core_min.js \
+	ext/cj/x64-core_min.js \
+	ext/cj/aes_min.js \
+	ext/cj/tripledes_min.js \
+	ext/cj/enc-base64_min.js \
+	ext/cj/md5_min.js \
+	ext/cj/sha1_min.js \
+	ext/cj/sha256_min.js \
+	ext/cj/sha224_min.js \
+	ext/cj/sha512_min.js \
+	ext/cj/sha384_min.js \
+	ext/cj/ripemd160_min.js \
+	ext/cj/hmac_min.js \
+	ext/cj/pbkdf2_min.js
+
+
 
 JSRUN=jsrun-jsrsasign.sh
 
 JSDOCOUTDIR1=_tmp
 
 APIDOCDIR=api
+
+minify: jsrsasign-all-min.js
+	@echo "jsrsasign-all-min.js builded"
+
+jsrsasign-all-min.js: all-min all-ext-min
+	cat \
+		src/version.js \
+		$(FILES_CRYPTOJS_MIN) \
+		all-ext-min \
+		all-min \
+		> jsrsasign.js
 
 jsdoc:
 	rm -rf $(APIDOCDIR)
@@ -79,10 +116,10 @@ all-ext-min: $(FILES_EXT_MIN)
 	@echo "all ext min converted."
 
 min/%.min.js: src/%.js
-	yuicmp $^ -o $@
+	yuicompressor $^ -o $@
 
 ext/%-min.js: ext/%.js
-	yuicmp $^ -o $@
+	yuicompressor $^ -o $@
 
 gitadd-all-doc:
 	git add api/*.html api/symbols/*.html api/symbols/src/*.html LICENSE.txt

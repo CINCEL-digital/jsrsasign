@@ -1189,7 +1189,7 @@ KJUR.asn1.cms.SignerInfo = function(params) {
 	 }
 	 else {
 	   prvkey = params.signkey;
-	   sig = new CINCEL.crypto.HSMSignature({alg: sigalg, prov: params.provName, provInfo: params.provInfo});
+	   sig = new _KJUR_crypto.adds.HSMSignature({alg: sigalg, prov: params.provName, provInfo: params.provInfo});
 	 }
 	   
 	sig.init(prvkey);
